@@ -86,13 +86,18 @@ namespace TheCpu
 		static void In(CPU cpu, ref int newPC)
 		{
 			Console.Write("?>");
-			int input = int.Parse(Console.ReadLine());
+            if (cpu.IN.Count == 0)
+            {
+                cpu.IN.Push(int.Parse(Console.ReadLine()));
+            }
+            int input = cpu.IN.Pop();
 			cpu.WriteArg(0, input);
 		}
 
 		static void Out(CPU cpu, ref int newPC)
 		{
 			Word output = cpu.ReadArg(0);
+            cpu.OUT = (int)output;
 			Console.WriteLine($":>{output}");
 		}
 

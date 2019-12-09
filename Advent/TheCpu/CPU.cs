@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-
+using System.Numerics;
 using Word = System.Numerics.BigInteger;
 
 namespace TheCpu
@@ -20,10 +21,13 @@ namespace TheCpu
 		public int PC { get; private set; }
 		public bool Halt { get; internal set; }
 		public int RBO { get; internal set; }
+        public BigInteger OUT { get; internal set; }
+        public Stack<int> IN { get; internal set; }
 
 		public CPU(int ramSize = 4096)
 		{
 			RAM = new RAM(ramSize);
+            IN = new Stack<int>();
 		}
 
 		public void Load(params Word[] program)
