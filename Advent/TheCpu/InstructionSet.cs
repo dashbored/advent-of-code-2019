@@ -88,9 +88,10 @@ namespace TheCpu
 			Console.Write("?>");
             if (cpu.IN.Count == 0)
             {
-                cpu.IN.Push(int.Parse(Console.ReadLine()));
+                //cpu.IN.Push(int.Parse(Console.ReadLine()));
+                cpu.IN.Push(cpu.OUT);
             }
-            int input = cpu.IN.Pop();
+            Word input = cpu.IN.Pop();
 			cpu.WriteArg(0, input);
 		}
 

@@ -21,13 +21,13 @@ namespace TheCpu
 		public int PC { get; private set; }
 		public bool Halt { get; internal set; }
 		public int RBO { get; internal set; }
-        public BigInteger OUT { get; internal set; }
-        public Stack<int> IN { get; internal set; }
+        public Word OUT { get; internal set; }
+        public Stack<Word> IN { get; internal set; }
 
 		public CPU(int ramSize = 4096)
 		{
 			RAM = new RAM(ramSize);
-            IN = new Stack<int>();
+            IN = new Stack<Word>();
 		}
 
 		public void Load(params Word[] program)

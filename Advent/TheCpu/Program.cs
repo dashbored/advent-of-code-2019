@@ -31,32 +31,49 @@ namespace TheCpu
 
         private static void Amplify(CPU cpu, int loops)
         {
-            Stack<int>[] phaseSettings = null;
-            var s = GetPhaseSettings();
-            //var phaseSettings = new Stack<int>(new int[] { 0, 4, 1, 3, 2 });
-            foreach (var phaseSetting in phaseSettings)
+            //List<Stack<int>> phaseSettings = GetPhaseSettings();
+            Stack<int> phaseSetting = new Stack<int>(new int[5] { 6, 5, 8, 7, 9 });
+
+            int maxVal = 0;
+            //foreach (var phaseSetting in phaseSettings)
+            //{
+            for (int i = 0; i < loops; i++)
             {
-                for (int i = 0; i < loops; i++)
-                {
-                    //cpu.Load(3, 31, 3, 32, 1002, 32, 10, 32, 1001, 31, -2, 31, 1007, 31, 0, 33, 1002, 33, 7, 33, 1, 33, 31, 31, 1, 32, 31, 31, 4, 31, 99, 0, 0, 0);
-                    cpu.Load(@"E:\Downloads\dev\advent-of-code-2019\inputs\day7-1.txt");
-                    cpu.IN.Push((int)cpu.OUT);
-                    cpu.IN.Push(phaseSetting.Pop());
-                    cpu.Run();
-                }
+                cpu.Load(3, 52, 1001, 52, -5, 52, 3, 53, 1, 52, 56, 54, 1007, 54, 5, 55, 1005, 55, 26, 1001, 54, -5, 54, 1105, 1, 12, 1, 53, 54, 53, 1008, 54, 0, 55, 1001, 55, 1, 55, 2, 53, 55, 53, 4, 53, 1001, 56, -1, 56, 1005, 56, 6, 99, 0, 0, 0, 0, 10);
+                cpu.IN.Push(cpu.OUT);
+                cpu.IN.Push(phaseSetting.Pop());
+                cpu.Run();
             }
+            maxVal = Math.Max(maxVal, (int)cpu.OUT);
+            //}
         }
 
-        private static List<int[]> GetPhaseSettings()
+        private static void Amplify(CPU[] cpus)
         {
-            int[] values = new int[] { 0, 1, 2, 3, 4 };
+            var ampA = cpus[0];
+            var ampB = cpus[1];
+            var ampC = cpus[2];
+            var ampD = cpus[3];
+            var ampE = cpus[4];
+
+        }
+
+        private static List<Stack<int>> GetPhaseSettings()
+        {
+            int[] values = new int[] { 5, 6, 7, 8, 9 };
             List<int[]> phaseSettings = new List<int[]>();
             Permutations.ForAllPermutation(values, (vals) =>
             {
-                phaseSettings.Add(vals);
+                int[] order = new int[5] { vals[0], vals[1], vals[2], vals[3], vals[4] };
+                phaseSettings.Add(order);
                 return false;
             });
-            return phaseSettings;
+            List<Stack<int>> ps = new List<Stack<int>>();
+            foreach (var phaseSetting in phaseSettings)
+            {
+                ps.Add(new Stack<int>(phaseSetting));
+            }
+            return ps;
         }
     }
 
