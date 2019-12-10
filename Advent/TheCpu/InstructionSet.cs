@@ -73,7 +73,7 @@ namespace TheCpu
 
 		static void Add(CPU cpu, ref int newPC)
 		{
-			cpu.ReadArgs(out var lhs, out var rhs);			
+			cpu.ReadArgs(out var lhs, out var rhs);
 			cpu.WriteArg(2, lhs + rhs);
 		}
 
@@ -86,19 +86,17 @@ namespace TheCpu
 		static void In(CPU cpu, ref int newPC)
 		{
 			Console.Write("?>");
-            if (cpu.IN.Count == 0)
-            {
-                //cpu.IN.Push(int.Parse(Console.ReadLine()));
-                cpu.IN.Push(cpu.OUT);
-            }
-            Word input = cpu.IN.Pop();
+
+			cpu.IN.Push(int.Parse(Console.ReadLine()));
+
+			Word input = cpu.IN.Pop();
 			cpu.WriteArg(0, input);
 		}
 
 		static void Out(CPU cpu, ref int newPC)
 		{
 			Word output = cpu.ReadArg(0);
-            cpu.OUT = (int)output;
+			cpu.OUT = output;
 			Console.WriteLine($":>{output}");
 		}
 
@@ -120,7 +118,7 @@ namespace TheCpu
 			{
 				newPC = (int)cpu.ReadArg(1);
 			}
-		}	
+		}
 
 		static void TestLessThan(CPU cpu, ref int newPC)
 		{
@@ -128,7 +126,7 @@ namespace TheCpu
 
 			Word value = lhs < rhs ? 1 : 0;
 			cpu.WriteArg(2, value);
-			
+
 		}
 
 		static void TestEqual(CPU cpu, ref int newPC)

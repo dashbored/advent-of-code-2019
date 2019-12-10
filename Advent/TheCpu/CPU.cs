@@ -27,7 +27,7 @@ namespace TheCpu
 		public CPU(int ramSize = 4096)
 		{
 			RAM = new RAM(ramSize);
-            IN = new Stack<Word>();
+			IN = new Stack<Word>();
 		}
 
 		public void Load(params Word[] program)
