@@ -52,11 +52,13 @@ namespace Day11
 				if (isMoveTurn)
 				{
 					Move((int)instr);
+					isMoveTurn = false;
 				}
 				else
 				{
 					Paint((int)instr);
 					drawer.Draw(Grid(), Position, direction);
+					isMoveTurn = true;
 				}
 			}
 		}
@@ -90,6 +92,10 @@ namespace Day11
 			if (newDirection < 0)
 			{
 				newDirection = 3;
+			}
+			else if (newDirection == 4)
+			{
+				newDirection = 0;
 			}
 
 			direction = (Directions)newDirection;

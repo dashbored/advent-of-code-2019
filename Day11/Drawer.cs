@@ -30,7 +30,7 @@ namespace Day11
 			{
 				var x = GRID_CENTER + coord.X;
 				var y = GRID_CENTER + coord.Y;
-				visualGrid[x, y] = coord.Color.ToString();
+				visualGrid[x, y] = coord.Color == 1 ? "#" : ".";
 			}
 
 			visualGrid[GRID_CENTER + position.X, GRID_CENTER + position.Y] = GetDirectionSymbol(direction);
@@ -44,15 +44,16 @@ namespace Day11
 				}
 				Console.WriteLine();
 			}
+			System.Threading.Thread.Sleep(100);
 
 		}
 
 		private string GetDirectionSymbol(Directions direction) => direction switch
 		{
-			Directions.Up => "^",
-			Directions.Right => ">",
-			Directions.Down => "v",
-			Directions.Left => "<",
+			Directions.Up => ">",
+			Directions.Right => "v",
+			Directions.Down => "<",
+			Directions.Left => "^",
 		};
 	}
 }
