@@ -1,40 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
+
 using Word = System.Numerics.BigInteger;
 
 namespace TheCpu
 {
-	enum ReadMode
+	enum ParameterMode
 	{
-		Address = 0,
+		Position = 0,
 		Immediate = 1,
 		Relative = 2
 	};
 
-	class CPU
+	public class CPU
 	{
-		public RAM RAM { get; private set; }
-		public int IC { get; private set; }
-		public int ArgFlags { get; private set; }
-		public int PC { get; private set; }
-		public bool Halt { get; internal set; }
-		public int RBO { get; internal set; }
-        public Word OUT { get; internal set; }
-        public Stack<Word> IN { get; internal set; }
+		const int KiB = 1024;
+		const int MiB = KiB * KiB;
 
-		public CPU(int ramSize = 4096)
+		private int ArgFlags { get; set; }
+		private RAM RAM { get; }
+		public IOPort IO { get; }
+		
+		public bool PrintInstructions { get; set; }
+		public bool PrintRamAccess { get; set; }
+		
+		public int IC { get; private set; }
+		public int PC { get; private set; }
+		public Word RelativeBase { get; internal set; }
+		public bool Halt { get; internal set; }
+
+		public CPU(IOPort io = null)
 		{
-			RAM = new RAM(ramSize);
-			IN = new Stack<Word>();
+			RAM = new RAM(KiB, MiB);
+			IO = io ?? new IOPort();
 		}
 
 		public void Load(params Word[] program)
 		{
 			RAM.Load(program);
 			PC = 0;
+			IC = 0;
+			RelativeBase = 0;
 			Halt = false;
+			ArgFlags = 0;
 		}
 
 		public void Load(string programPath)
@@ -59,10 +67,10 @@ namespace TheCpu
 
 		private Instruction Decode()
 		{
-			Word word = Peek(PC);
-			ArgFlags = (int)(word / 100);
+			int word = (int)Peek(PC);
+			ArgFlags = (word / 100);
 
-			return InstructionSet.Get((int)word);
+			return InstructionSet.Get(word);
 		}
 
 		private void Execute(Instruction instruction)
@@ -77,66 +85,89 @@ namespace TheCpu
 
 		private void Print(Instruction instruction)
 		{
-			string pc = PC.ToString().PadLeft(4, '0');
-			string code = ToString(instruction);
-			Console.WriteLine($"{pc} :: {code}");
+			if (PrintInstructions)
+			{
+				string pc = PC.ToString().PadLeft(4, '0');
+				string code = ToString(instruction);
+				Console.WriteLine($"{pc} :: {code}");
+			}
+		}
+
+		private void Print(string ramAccessMessage)
+		{
+			if (PrintRamAccess)
+			{
+				Console.WriteLine(ramAccessMessage);
+			}
 		}
 
 		private string ToString(Instruction instruction)
 		{
-			string GetArg(int index)
+			string ArgToString(int index)
 			{
 				Word value = Peek(PC + 1 + index);
-				return GetFlag(index) switch
+
+				return GetArgMode(index) switch
 				{
-					ReadMode.Immediate => $"{value}",
-					ReadMode.Address => $"*{value}",
-					ReadMode.Relative => $"[{value}]",
+					ParameterMode.Immediate => $"{value}",
+					ParameterMode.Position => $"*{value}",
+					ParameterMode.Relative => $"[{value}]",
 					_ => throw new Exception("Invalid read mode"),
 				};
 			}
 
-			var args = Enumerable.Range(0, instruction.ArgumentCount).Select(GetArg);
+			var args = Enumerable.Range(0, instruction.ArgumentCount).Select(ArgToString);
 			return $"{instruction.Name} {string.Join(" ", args)}".TrimEnd();
 		}
 
-		internal ReadMode GetFlag(int argIndex)
+		private ParameterMode GetArgMode(int argIndex)
 		{
 			int mask = (int)Math.Pow(10, argIndex);
 			int flag = (ArgFlags / mask) % 10;
-			return (ReadMode)flag;
+			return (ParameterMode)flag;
 		}
 
 		internal Word ReadArg(int argIndex)
 		{
-			Word address = PC + 1 + argIndex;
-			var mode = GetFlag(argIndex);
-			return Read(address, mode);
+			GetArg(argIndex, out var argValue, out var mode);
+
+			return mode switch
+			{
+				ParameterMode.Immediate => argValue,
+				_ => Read(argValue + GetOffset(mode)),
+			};
 		}
 
 		internal void WriteArg(int argIndex, Word value)
 		{
-			Word argAddress = PC + 1 + argIndex;
-			Word writeAddress = Read(argAddress);
+			GetArg(argIndex, out var argValue, out var mode);
+
+			Word writeAddress = argValue + GetOffset(mode);
 			Write(writeAddress, value);
 		}
 
-		internal Word Read(Word address, ReadMode mode = ReadMode.Immediate)
+		private void GetArg(int argIndex, out Word argValue, out ParameterMode mode)
+		{
+			Word argAddress = PC + 1 + argIndex;
+			argValue = Read(argAddress);
+			mode = GetArgMode(argIndex);
+		}
+
+		private Word GetOffset(ParameterMode mode)
+		{
+			return mode == ParameterMode.Relative ? RelativeBase : 0;
+		}
+
+		internal Word Read(Word address)
 		{
 			Word value = Peek(address);
-			//Console.WriteLine($"   RAM {address} -> {value}");
-			return mode switch
-			{
-				ReadMode.Immediate => value,
-				ReadMode.Address => Read(value),
-				ReadMode.Relative => Read(RBO + value),
-				_ => throw new Exception("Invalid read mode"),
-			};
+			Print($"   RAM {address} -> {value}");
+			return value;
 		}
 
 		internal void Write(Word address, Word value)
 		{
-			//Console.WriteLine($"   RAM {address} <- {value}");
+			Print($"   RAM {address} <- {value}");
 			RAM[address] = value;
 		}
 
@@ -154,12 +185,6 @@ namespace TheCpu
 		{
 			ReadArgs(out arg1);
 			arg2 = ReadArg(1);
-		}
-
-		internal void ReadArgs(out Word arg1, out Word arg2, out Word arg3)
-		{
-			ReadArgs(out arg1, out arg2);
-			arg3 = ReadArg(2);
 		}
 	}
 }

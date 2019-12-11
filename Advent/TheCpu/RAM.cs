@@ -4,11 +4,13 @@ using Word = System.Numerics.BigInteger;
 
 namespace TheCpu
 {
-	class RAM
+	public class RAM
 	{
-		private Word[] ram;
+		private Word[] memory;
 
-		public int Size => ram.Length;
+		public int Size => memory.Length;
+
+		public int MaxSize { get; }
 
 		public Word this[Word address]
 		{
@@ -16,46 +18,52 @@ namespace TheCpu
 			set => Poke(address, value);
 		}
 
-		public RAM(int size)
+		public RAM(int size, int maxSize)
 		{
-			ram = new Word[size];
+			memory = new Word[size];
+			MaxSize = maxSize;
 		}
 
 		public void Load(Word[] data)
 		{
-			IsBadAddress(data.Length + 1);
-			Array.Copy(data, ram, data.Length);
+			if (IsBadAddress(data.Length - 1))
+			{
+				throw new AddressException(data.Length - 1, MaxSize);
+			}
+
+			Array.Copy(data, memory, data.Length);
 		}
 
 		private Word Peek(Word address)
 		{
 			if (IsBadAddress(address))
 			{
-				throw new AddressException(address, Size);
+				throw new AddressException(address, MaxSize);
 			}
 
-			return ram[(int)address];
+			return memory[(int)address];
 		}
 
 		private void Poke(Word address, Word value)
 		{
 			if (IsBadAddress(address))
 			{
-				throw new AddressException(address, Size);
+				throw new AddressException(address, MaxSize);
 			}
 
-			ram[(int)address] = value;
+			memory[(int)address] = value;
 		}
 
 		private bool IsBadAddress(Word address)
 		{
 			if (address < 0) return true;
+			if (address >= MaxSize) return true;
 
 			if (address >= Size)
 			{
 				var temp = new Word[(int)address + 1];
-				Array.Copy(ram, temp, ram.Length);
-				ram = temp;				
+				Array.Copy(memory, temp, memory.Length);
+				memory = temp;				
 			}
 
 			return false;

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+
+using Word = System.Numerics.BigInteger;
 
 namespace TheCpu
 {
@@ -8,18 +11,93 @@ namespace TheCpu
 	{
 		static void Main(string[] args)
 		{
+			Word max = -1;
+			string best = "?";
+
+			foreach (var permutation in GeneratePermutations(9, 8, 7, 6, 5))
+			{
+				var key = string.Join(",", permutation);
+				var result = Compute(permutation);
+
+				Console.WriteLine($"f({key}) = {result}");
+
+				if (result > max)
+				{
+					max = result;
+					best = key;
+				}
+			}
+
+			Console.WriteLine("Winner:");
+			Console.WriteLine($"{best} = {max}");
+		}
+
+		static IEnumerable<int[]> GeneratePermutations(params int[] args)
+		{
+			IEnumerable<int[]> Gen(int[] fix, int[] free)
+			{
+				foreach (int n in free)
+				{
+					var fixPlus = fix.Append(n).ToArray();
+					var ns = new int[] { n };
+					var freeMinus = free.Except(ns).ToArray();
+
+					foreach (var perm in Gen(fixPlus, freeMinus))
+					{
+						yield return perm;
+					}
+				}
+
+				if (free.Any() == false)
+				{
+					yield return fix;
+				}
+			}
+
+			return Gen(new int[0], args);
+		}
+
+		static Word Compute(params int[] args)
+		{
+			int N = args.Length;
+			Word result = -1;
+
 			try
 			{
-				var cpu = new CPU();
-				cpu.Load(@"C:\dev\slask\adventofcode2019\inputs\day9-1.txt");
-				//cpu.Load(104, 1125899906842624, 99);
-				cpu.Run();
+				Bus bus = new Bus(N);
+				var pipes = Enumerable.Range(0, N)
+					.Select(n => new IOBus(bus, n, (n + 1) % N))
+					.ToList();
 
-				//Amplify(cpu, 5);
+				List<Task> cluster = new List<Task>();
 
-				//CPU[] cpus = Enumerable.Range(0, 5).Select(x => new CPU()).ToArray();
-				//AmplifyMaximus(cpus);
-				Console.WriteLine($"IC: {cpu.IC}, OUT: {cpu.OUT}");
+				foreach (var pipe in pipes)
+				{
+					int id = cluster.Count;
+
+					pipe.Write(args[id]);
+					if (id == 0)
+					{
+						pipe.Write(0);
+					}
+
+					var cpu = new CPU(pipe);
+
+					var task = Task.Run(() =>
+					{
+						cpu.Load(@"T:\Fredrik\day7-1.txt");
+						cpu.Run();
+
+						if (id == 0)
+						{
+							result = bus.Read(1);							
+						}
+					});
+
+					cluster.Add(task);
+				}
+
+				Task.WaitAll(cluster.ToArray());				
 			}
 			catch (DecodeException ex)
 			{
@@ -33,71 +111,8 @@ namespace TheCpu
 			{
 				Console.WriteLine(ex);
 			}
-		}
 
-		private static void Amplify(CPU cpu, int loops)
-		{
-			List<Stack<int>> phaseSettings = GetPhaseSettings(6, 5);
-			int maxVal = 0;
-			foreach (var phaseSetting in phaseSettings)
-			{
-				for (int i = 0; i < loops; i++)
-				{
-					cpu.Load(3, 52, 1001, 52, -5, 52, 3, 53, 1, 52, 56, 54, 1007, 54, 5, 55, 1005, 55, 26, 1001, 54, -5, 54, 1105, 1, 12, 1, 53, 54, 53, 1008, 54, 0, 55, 1001, 55, 1, 55, 2, 53, 55, 53, 4, 53, 1001, 56, -1, 56, 1005, 56, 6, 99, 0, 0, 0, 0, 10);
-					//cpu.IN.Push(cpu.OUT);
-					//cpu.IN.Push(phaseSetting.Pop());
-					cpu.Run();
-				}
-				maxVal = Math.Max(maxVal, (int)cpu.OUT);
-			}
-		}
-
-		private static void AmplifyMaximus(CPU[] cpus)
-		{
-			foreach (var cpu in cpus)
-			{
-				cpu.Load(3, 26, 1001, 26, -4, 26, 3, 27, 1002, 27, 2, 27, 1, 27, 26, 27, 4, 27, 1001, 28, -1, 28, 1005, 28, 6, 99, 0, 0, 5);
-			}
-
-			List<Stack<int>> phaseSettings = GetPhaseSettings(0, 5);
-
-		}
-
-		private static List<Stack<int>> GetPhaseSettings(int min, int count)
-		{
-			var output = new List<int[]>();
-			Permutate(new List<int>(Enumerable.Range(min, count)), new List<int>(), output);
-
-			var ps = new List<Stack<int>>();
-			foreach (var phaseSetting in output)
-			{
-				ps.Add(new Stack<int>(phaseSetting));
-			}
-			return ps;
-		}
-
-		private static void Permutate(List<int> available, List<int> taken, List<int[]> output)
-		{
-			if (available.Count < 1)
-			{
-				output.Add(taken.ToArray());
-				return;
-			}
-
-			for (int i = 0; i < available.Count; i++)
-			{
-				var x = available[i];
-				taken.Add(x);
-
-				var availableCopy = available.ToList();
-				availableCopy.RemoveAt(i);
-
-				var takenCopy = taken.ToList();
-				Permutate(availableCopy, takenCopy, output);
-				taken.Remove(x);
-			}
+			return result;
 		}
 	}
-
-
 }

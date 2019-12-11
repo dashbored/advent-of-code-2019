@@ -58,7 +58,7 @@ namespace TheCpu
 			Register(7, 3, TestLessThan, "TLT");
 			Register(8, 3, TestEqual, "TEQ");
 
-			// RBO
+			// Relative base offset
 			Register(9, 1, SetRelativeBase, "RBO");
 
 			// Halt
@@ -73,7 +73,7 @@ namespace TheCpu
 
 		static void Add(CPU cpu, ref int newPC)
 		{
-			cpu.ReadArgs(out var lhs, out var rhs);
+			cpu.ReadArgs(out var lhs, out var rhs);			
 			cpu.WriteArg(2, lhs + rhs);
 		}
 
@@ -85,19 +85,14 @@ namespace TheCpu
 
 		static void In(CPU cpu, ref int newPC)
 		{
-			Console.Write("?>");
-
-			cpu.IN.Push(int.Parse(Console.ReadLine()));
-
-			Word input = cpu.IN.Pop();
+			Word input = cpu.IO.Read();
 			cpu.WriteArg(0, input);
 		}
 
 		static void Out(CPU cpu, ref int newPC)
 		{
 			Word output = cpu.ReadArg(0);
-			cpu.OUT = output;
-			Console.WriteLine($":>{output}");
+			cpu.IO.Write(output);
 		}
 
 		static void JumpIfTrue(CPU cpu, ref int newPC)
@@ -118,7 +113,7 @@ namespace TheCpu
 			{
 				newPC = (int)cpu.ReadArg(1);
 			}
-		}
+		}	
 
 		static void TestLessThan(CPU cpu, ref int newPC)
 		{
@@ -126,7 +121,7 @@ namespace TheCpu
 
 			Word value = lhs < rhs ? 1 : 0;
 			cpu.WriteArg(2, value);
-
+			
 		}
 
 		static void TestEqual(CPU cpu, ref int newPC)
@@ -140,7 +135,7 @@ namespace TheCpu
 		static void SetRelativeBase(CPU cpu, ref int newPC)
 		{
 			cpu.ReadArgs(out var offset);
-			cpu.RBO += (int)offset;
+			cpu.RelativeBase += offset;
 		}
 	}
 }
