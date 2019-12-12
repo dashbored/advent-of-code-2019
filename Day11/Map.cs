@@ -8,6 +8,7 @@ namespace Day11
 	class Map
 	{
 		private List<Coordinate> Grid { get; set; }
+		private bool startAtWhite { get; set; }
 
 		public Map()
 		{
@@ -18,7 +19,9 @@ namespace Day11
 
 		internal Coordinate GetStartingPosition()
 		{
-			return Grid.First();
+			var coordinate = Grid.First();
+			coordinate.Color = 1;
+			return coordinate;
 		}
 
 		internal Coordinate GetCoordinate(int x, int y)

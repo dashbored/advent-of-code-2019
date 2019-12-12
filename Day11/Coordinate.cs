@@ -21,11 +21,6 @@ namespace Day11
 
 		public void SetColor(int color)
 		{
-			if (Color == color)
-			{
-				return;
-			}
-
 			previousColors.Add(Color);
 			Color = color;
 		}

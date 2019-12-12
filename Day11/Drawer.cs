@@ -7,7 +7,7 @@ namespace Day11
 {
 	public class Drawer
 	{
-		const int GRID_CENTER = 20;
+		const int GRID_CENTER = 50;
 		public void Draw(List<Coordinate> grid, Coordinate position, Directions direction)
 		{
 			var visualGrid = new string[GRID_CENTER*2 + 1, GRID_CENTER * 2 + 1];

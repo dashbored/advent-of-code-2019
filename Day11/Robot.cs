@@ -23,6 +23,8 @@ namespace Day11
         private Drawer drawer = new Drawer();
         private bool enableDrawing { get; set; }
 
+
+
         private CPU Cpu { get; set; }
         private IOPort Port { get; set; }
         private Map Map { get; set; }
@@ -35,7 +37,7 @@ namespace Day11
             Map = map;
             Position = Map.GetStartingPosition();
             Cpu = cpu;
-            Cpu.Load(@"E:\Downloads\dev\advent-of-code-2019\inputs\day11-1.txt");
+            Cpu.Load(@"\\fs\Temp\Fredrik\day11-1.txt");
 
             this.enableDrawing = enableDrawing;
         }
@@ -72,7 +74,12 @@ namespace Day11
             Port.Write(Position.Color);
         }
 
-        private void UpdateGUI()
+        internal void UseGUI()
+        {
+            enableDrawing = true;
+        }
+
+        public void UpdateGUI()
         {
             if (enableDrawing)
             {

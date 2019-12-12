@@ -13,7 +13,6 @@ namespace Day11
 			var IOBus = new IOBus(bus, 0, 1);
 			var cpu = new CPU(IOBus);
 			var IOBus2 = new IOBus(bus, 1, 0);
-			//var IOPort = new IORoboPort();
 			var robot = new Robot(map, cpu, IOBus2);
 
 			var task = Task.Run(() =>
@@ -27,6 +26,8 @@ namespace Day11
 			});
 
 			Task.WaitAll(task2);
+			robot.UseGUI();
+			robot.UpdateGUI();
 			int paintedCoord = map.GetNumberOfPaintedCoordinates();
 			Console.WriteLine(paintedCoord);
 		}
