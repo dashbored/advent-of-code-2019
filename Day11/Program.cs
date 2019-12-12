@@ -26,7 +26,7 @@ namespace Day11
 				cpu.Run();
 			});
 
-			Task.WaitAll(task, task2);
+			Task.WaitAll(task2);
 			int paintedCoord = map.GetNumberOfPaintedCoordinates();
 			Console.WriteLine(paintedCoord);
 		}

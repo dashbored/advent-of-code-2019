@@ -7,17 +7,11 @@ namespace Day11
 {
 	public class Drawer
 	{
-		const int GRID_CENTER = 5;
+		const int GRID_CENTER = 20;
 		public void Draw(List<Coordinate> grid, Coordinate position, Directions direction)
 		{
-			
-			var maxX = grid.Max(c => c.X);
-			var maxY = grid.Max(c => c.Y);
-			var minX = grid.Min(c => c.X);
-			var minY = grid.Min(c => c.Y);
+			var visualGrid = new string[GRID_CENTER*2 + 1, GRID_CENTER * 2 + 1];
 
-
-			var visualGrid = new string[11, 11];
 			for (int i = 0; i < visualGrid.GetLength(0); i++)
 			{
 				for (int j = 0; j < visualGrid.GetLength(1); j++)
@@ -28,12 +22,12 @@ namespace Day11
 			
 			foreach (var coord in grid)
 			{
-				var x = GRID_CENTER + coord.X;
-				var y = GRID_CENTER + coord.Y;
-				visualGrid[x, y] = coord.Color == 1 ? "#" : ".";
+				var ud = GRID_CENTER + coord.X;
+				var lr = GRID_CENTER - coord.Y;
+				visualGrid[lr, ud] = coord.Color == 1 ? "#" : "-";
 			}
 
-			visualGrid[GRID_CENTER + position.X, GRID_CENTER + position.Y] = GetDirectionSymbol(direction);
+			visualGrid[GRID_CENTER - position.Y, GRID_CENTER + position.X] = GetDirectionSymbol(direction);
 
 			Console.Clear();
 			for (int i = 0; i < visualGrid.GetLength(0); i++)
@@ -44,16 +38,16 @@ namespace Day11
 				}
 				Console.WriteLine();
 			}
-			System.Threading.Thread.Sleep(100);
+			System.Threading.Thread.Sleep(10);
 
 		}
 
 		private string GetDirectionSymbol(Directions direction) => direction switch
 		{
-			Directions.Up => ">",
-			Directions.Right => "v",
-			Directions.Down => "<",
-			Directions.Left => "^",
+			Directions.Up => "^",
+			Directions.Right => ">",
+			Directions.Down => "v",
+			Directions.Left => "<",
 		};
 	}
 }

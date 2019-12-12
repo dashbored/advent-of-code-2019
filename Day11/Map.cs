@@ -26,7 +26,9 @@ namespace Day11
 			var coordinate = Grid.SingleOrDefault(c => c.X == x && c.Y == y);
 			if (coordinate == null)
 			{
-				return new Coordinate(x, y);
+                coordinate = new Coordinate(x, y);
+                Grid.Add(coordinate);
+                return coordinate;
 			}
 			return coordinate;
 		}
